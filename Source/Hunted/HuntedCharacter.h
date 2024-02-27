@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "AbilitySystemInterface.h"
 #include "HuntedCharacter.generated.h"
 
 class UInputComponent;
@@ -19,7 +20,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthChanged, int, HealthTotal);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDeath, AHuntedCharacter*, Player);
 
 UCLASS(config=Game)
-class AHuntedCharacter : public ACharacter
+class AHuntedCharacter : public ACharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -47,11 +48,25 @@ class AHuntedCharacter : public ACharacter
 public:
 	AHuntedCharacter();
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UAbilitySystemComponent* AbilitySystem;
+	
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override
+	{
+		return AbilitySystem;
+	}
+
+	UPROPERTY()
+	class UPlayerAttributeSet* AttributeSet;
+
 	UPROPERTY(BlueprintAssignable, Category = Health)
 	FOnHealthChanged HealthChangedEvent;
 
 	UPROPERTY(BlueprintAssignable, Category = Health)
 	FOnDeath DeathEvent;
+
+	UFUNCTION()
+	void ModifyHealth();
 	
 protected:
 	virtual void BeginPlay();
